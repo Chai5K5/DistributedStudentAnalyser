@@ -1,4 +1,5 @@
 # dashboard.py
+import time
 import tkinter as tk
 from tkinter import ttk, messagebox, simpledialog
 import sys, os
@@ -28,7 +29,7 @@ class StudentDashboard:
     def setup_ui(self):
         title = tk.Label(
             self.root,
-            text="📊 Distributed Student Record Analyzer (CRUD + ADBMS)",
+            text="📊 Distributed Student Record Analyzer",
             font=("Helvetica", 17, "bold"),
             bg="#F8F9FA",
             fg="#212529",
@@ -55,11 +56,29 @@ class StudentDashboard:
     # ------------------ Data Load ------------------
 
     def load_data(self):
+        """Fetch and display all students."""
+        # Clear existing data
         for row in self.tree.get_children():
             self.tree.delete(row)
+
+        # Create a progress bar
+        progress = ttk.Progressbar(self.root, orient="horizontal", length=400, mode="determinate")
+        progress.pack(pady=10)
+        progress["maximum"] = 100
+        progress["value"] = 0
+        self.root.update_idletasks()
+
         students = fetch_all_students()
-        for s in students:
+    
+    # Simulate progress while loading
+        for i, s in enumerate(students):
+            time.sleep(0.2)  # simulate load
             self.tree.insert("", tk.END, values=s)
+            progress["value"] = ((i + 1) / len(students)) * 100
+            self.root.update_idletasks()
+
+        progress.destroy()
+        messagebox.showinfo("Data Loaded", f"Loaded {len(students)} student records!")
 
     # ------------------ CRUD Operations ------------------
 
