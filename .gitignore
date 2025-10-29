@@ -1,0 +1,20 @@
+# Virtual environments
+venv/
+.env/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# IDE settings
+.vscode/
+.idea/
+
+# Databases or temp files
+*.db
+*.sqlite3
+
+# Logs
+*.log
