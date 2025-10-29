@@ -529,8 +529,7 @@ class StudentDashboard:
             fg_color="#0D6EFD",
             command=on_close
         ).pack()
-
-
+        
 def center_main_window(win, width=950, height=600):
     screen_w = win.winfo_screenwidth()
     screen_h = win.winfo_screenheight()
