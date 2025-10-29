@@ -196,22 +196,53 @@ class StudentDashboard:
         )
         title.pack(pady=12)
 
+        # Outer container for all button groups
         btn_outer = ctk.CTkFrame(self.root, fg_color="transparent")
         btn_outer.pack(pady=10, fill="x")
 
-        btn_inner = ctk.CTkFrame(btn_outer, fg_color="#212529", corner_radius=10)
+        # Inner frame to hold button groups
+        btn_inner = ctk.CTkFrame(btn_outer, fg_color="#212529", corner_radius=12)
         btn_inner.place(relx=0.5, rely=0.5, anchor="n")
 
-        button_config = {"width": 120, "height": 34, "corner_radius": 8, "font": ("Helvetica", 13, "bold")}
+        # Common button style
+        button_config = {"width": 110, "height": 34, "corner_radius": 8, "font": ("Helvetica", 13, "bold")}
 
-        ctk.CTkButton(btn_inner, text="🔄 Refresh", fg_color="#0D6EFD", command=self.load_data, **button_config).grid(row=0, column=0, padx=8, pady=10)
-        ctk.CTkButton(btn_inner, text="➕ Add", fg_color="#198754", command=self.add_student_ui, **button_config).grid(row=0, column=1, padx=8, pady=10)
-        ctk.CTkButton(btn_inner, text="✏ Update", fg_color="#FFC107", text_color="black", command=self.update_student_ui, **button_config).grid(row=0, column=2, padx=8, pady=10)
-        ctk.CTkButton(btn_inner, text="🗑 Delete", fg_color="#DC3545", command=self.delete_student_ui, **button_config).grid(row=0, column=3, padx=8, pady=10)
-        ctk.CTkButton(btn_inner, text="⬆ Sort", fg_color="#6610F2", command=self.sort_data, **button_config).grid(row=0, column=4, padx=8, pady=10)
-        ctk.CTkButton(btn_inner, text="🔍 Search", fg_color="#20C997", command=self.search_data, **button_config).grid(row=0, column=5, padx=8, pady=10)
-        ctk.CTkButton(btn_inner, text="📈 Summary Stats", fg_color="#6F42C1", command=self.show_summary, **button_config).grid(row=0, column=6, padx=8, pady=10)
+        # ------------------ Refresh Button ------------------
+        ctk.CTkButton(
+            btn_inner,
+            text="⟳",
+            width=40,
+            height=26,
+            fg_color="#0D6EFD",
+            font=("Helvetica", 18, "bold"),
+            command=self.load_data
+        ).grid(row=0, column=0, padx=12, pady=12)
 
+        # ------------------ CRUD Group ------------------
+        crud_frame = ctk.CTkFrame(btn_inner, fg_color="transparent")
+        crud_frame.grid(row=0, column=1, padx=12, pady=10)
+
+        ctk.CTkButton(crud_frame, text="➕ Add", fg_color="#198754", command=self.add_student_ui, **button_config).pack(side="left", padx=6)
+        ctk.CTkButton(crud_frame, text="✏ Update", fg_color="#FFC107", text_color="black", command=self.update_student_ui, **button_config).pack(side="left", padx=6)
+        ctk.CTkButton(crud_frame, text="🗑 Delete", fg_color="#DC3545", command=self.delete_student_ui, **button_config).pack(side="left", padx=6)
+
+        # ------------------ Sort/Search Group ------------------
+        sort_frame = ctk.CTkFrame(btn_inner, fg_color="transparent")
+        sort_frame.grid(row=0, column=2, padx=20, pady=10)
+
+        ctk.CTkButton(sort_frame, text="⬆ Sort", fg_color="#6610F2", command=self.sort_data, **button_config).pack(side="left", padx=6)
+        ctk.CTkButton(sort_frame, text="🔍 Search", fg_color="#20C997", command=self.search_data, **button_config).pack(side="left", padx=6)
+
+        # ------------------ Independent Summary Stats ------------------
+        ctk.CTkButton(
+            btn_inner,
+            text="📈 Summary Stats",
+            fg_color="#6F42C1",
+            command=self.show_summary,
+            **button_config
+        ).grid(row=0, column=3, padx=16, pady=10)
+
+        # ------------------ Table ------------------
         table_frame = ctk.CTkFrame(self.root, fg_color="#343A40", corner_radius=12)
         table_frame.pack(pady=12, padx=25, fill="both", expand=True)
 
@@ -229,8 +260,10 @@ class StudentDashboard:
             self.tree.column(col, anchor="center", width=160)
         self.tree.pack(pady=10, fill="both", expand=True)
 
+        # Progress bar at bottom
         self.progress_container = ctk.CTkFrame(self.root, fg_color="transparent")
         self.progress_container.pack(side="bottom", pady=12)
+
 
     def ask_sequence_inputs(self, inputs):
         results = []
@@ -365,8 +398,6 @@ class StudentDashboard:
 
         # ------------------ Summary & Graphs ------------------
 
-        # ------------------ Summary & Graphs ------------------
-
     def show_summary(self):
         students = fetch_all_students()
         if not students:
@@ -388,14 +419,14 @@ class StudentDashboard:
         summary_win = ctk.CTkToplevel(self.root)
         summary_win.title("Summary Statistics")
         summary_win.configure(fg_color="#1E1E1E")
-        summary_win.geometry("820x720")
+        summary_win.geometry("820x520")
 
         # Bring window to front and make modal
         summary_win.transient(self.root)
         summary_win.grab_set()
         summary_win.lift()
         summary_win.focus_force()
-        center_window(summary_win, self.root, 820, 720)
+        center_window(summary_win, self.root, 820, 520)
 
         # ---------------- Header ----------------
         ctk.CTkLabel(
@@ -407,9 +438,9 @@ class StudentDashboard:
 
         # ---------------- Scrollable Frame ----------------
         scroll_frame = ctk.CTkScrollableFrame(
-            summary_win, width=780, height=580, fg_color="#2B2B2B"
+            summary_win, width=780, height=400, fg_color="#2B2B2B"
         )
-        scroll_frame.pack(pady=5, padx=10, fill="both", expand=True)
+        scroll_frame.pack(pady=(5, 5), padx=10, fill="both", expand=True)
 
         # ---------------- Summary Text Formatting ----------------
         summary_text = ""
@@ -473,25 +504,31 @@ class StudentDashboard:
         canvas.draw()
         canvas_widget = canvas.get_tk_widget()
         canvas_widget.pack(pady=10)
+        # ---------------- Graphs End ----------------
+
+        # ---------------- Close Button ----------------
+        btn_frame = ctk.CTkFrame(summary_win, fg_color="transparent")
+        btn_frame.pack(side="bottom", pady=12)
 
         # ---------------- Close Handler ----------------
         def on_close():
             try:
                 canvas.get_tk_widget().destroy()
-                plt.close(fig)
+                plt.close('all')
             except Exception:
                 pass
             summary_win.destroy()
 
         summary_win.protocol("WM_DELETE_WINDOW", on_close)
-
+        
         ctk.CTkButton(
-            summary_win,
+            btn_frame,
             text="Close",
-            width=120,
+            width=60,
+            height=40,
             fg_color="#0D6EFD",
             command=on_close
-        ).pack(pady=15)
+        ).pack()
 
 
 def center_main_window(win, width=950, height=600):
