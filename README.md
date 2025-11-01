@@ -1,12 +1,12 @@
 Project Information
 
-    Project Name: Distributed Student Analyzer
-    Student Name: Chaitanya Sharma
-    UID: 25MCD10056
-    Course: MCA Data Science (DS)
-    Department: UIC (University Institute of Computing)
-    Subject: Python Programming (25CAH-606)
-    Semester: 1st
+Project Name: Distributed Student Analyzer
+Student Name: Chaitanya Sharma
+UID: 25MCD10056
+Course: MCA Data Science (DS)
+Department: UIC (University Institute of Computing)
+Subject: Python Programming (25CAH-606)
+Semester: 1st
     
 Project Overview
 
