@@ -46,7 +46,7 @@ attendance data—automatically highlighting students with attendance below 75%.
         source venv/bin/activate
 3. Install libraries
    
-       pip install numpy pandas matplotlib seaborn streamlit
+       pip install customtkinter matplotlib numpy pandas
 4. Run the following command
    
        python ui/dashboard.py
