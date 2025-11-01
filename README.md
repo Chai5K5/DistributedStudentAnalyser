@@ -41,7 +41,7 @@ attendance data—automatically highlighting students with attendance below 75%.
     #### **For Windows**
         python -m venv venv
         venv\Scripts\activate
-    #### ** For Mac **
+    #### **For Mac**
         python3 -m venv venv
         source venv/bin/activate
 3. Install libraries
