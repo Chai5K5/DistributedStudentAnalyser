@@ -1,95 +1,103 @@
-# backend/db_handler.py
-import mysql.connector
+import mysql.connector, json, threading
 from mysql.connector import Error
 
-# Connections to both databases
-def connect_cse():
-    return mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="@Admin123",
-        database="db_cse"
-    )
+# Load global metadata
+with open("backend/meta_config.json") as f:
+    META = json.load(f)
 
-def connect_aiml():
-    return mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="@Admin123",
-        database="db_aiml"
-    )
-
+# -------- Connection helpers --------
 def get_connection(branch):
-    """Return connection to correct database based on branch."""
-    if branch.upper() == "CSE":
-        return connect_cse()
-    elif branch.upper() == "AIML":
-        return connect_aiml()
-    else:
+    cfg = META.get(branch.upper())
+    if not cfg:
         raise ValueError(f"Unknown branch: {branch}")
+    return mysql.connector.connect(
+        host=cfg["host"],
+        user=cfg["user"],
+        password=cfg["password"],
+        database=cfg["database"]
+    )
 
+def get_all_connections():
+    for name, cfg in META.items():
+        yield name, mysql.connector.connect(
+            host=cfg["host"],
+            user=cfg["user"],
+            password=cfg["password"],
+            database=cfg["database"]
+        )
+
+# -------- Distributed Operations --------
 def fetch_all_students():
-    """Fetch all students from both nodes."""
+    """Union of students from every node."""
     students = []
-    try:
-        conn_cse = connect_cse()
-        conn_aiml = connect_aiml()
-        cur_cse = conn_cse.cursor()
-        cur_aiml = conn_aiml.cursor()
-        cur_cse.execute("SELECT * FROM students;")
-        cur_aiml.execute("SELECT * FROM students;")
-        students.extend(cur_cse.fetchall())
-        students.extend(cur_aiml.fetchall())
-    finally:
-        if conn_cse.is_connected():
-            conn_cse.close()
-        if conn_aiml.is_connected():
-            conn_aiml.close()
+    threads = []
+
+    def fetch_from_node(node, conn):
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM students;")
+        rows = cur.fetchall()
+        students.extend(rows)
+        conn.close()
+
+    for name, conn in get_all_connections():
+        t = threading.Thread(target=fetch_from_node, args=(name, conn))
+        t.start()
+        threads.append(t)
+    for t in threads:
+        t.join()
+
     return students
 
-# ------------------ CRUD FUNCTIONS ------------------
-
 def add_student(roll_no, name, branch, marks, attendance):
-    """Insert a new student into correct node."""
     conn = get_connection(branch)
     try:
-        cursor = conn.cursor()
-        query = "INSERT INTO students (roll_no, name, branch, marks, attendance) VALUES (%s, %s, %s, %s, %s)"
-        cursor.execute(query, (roll_no, name, branch, marks, attendance))
+        cur = conn.cursor()
+        cur.execute(
+            "INSERT INTO students VALUES (%s,%s,%s,%s,%s)",
+            (roll_no, name, branch, marks, attendance)
+        )
         conn.commit()
-        return True
+        print(f"✅ Student {name} added to {branch} node.")
     except Error as e:
-        print("❌ Error adding student:", e)
-        return False
+        if e.errno == 1062:
+            print(f"⚠️ Duplicate roll_no {roll_no} — skipping insert.")
+        else:
+            print("❌ Error adding student:", e)
     finally:
         conn.close()
 
-def update_student(roll_no, branch, new_marks, new_attendance):
-    """Update marks/attendance for a student."""
-    conn = get_connection(branch)
-    try:
-        cursor = conn.cursor()
-        query = "UPDATE students SET marks=%s, attendance=%s WHERE roll_no=%s"
-        cursor.execute(query, (new_marks, new_attendance, roll_no))
-        conn.commit()
-        return cursor.rowcount > 0
-    except Error as e:
-        print("❌ Error updating student:", e)
-        return False
-    finally:
+def search_students(keyword=None, min_marks=None, max_marks=None, branch=None):
+    """Example distributed selection & projection using σ conditions."""
+    results, threads = [], []
+    conditions, params = [], []
+
+    if keyword:
+        conditions.append("name LIKE %s")
+        params.append(f"%{keyword}%")
+    if min_marks is not None:
+        conditions.append("marks >= %s")
+        params.append(min_marks)
+    if max_marks is not None:
+        conditions.append("marks <= %s")
+        params.append(max_marks)
+
+    where = "WHERE " + " AND ".join(conditions) if conditions else ""
+
+    def run_query(conn):
+        cur = conn.cursor()
+        cur.execute(f"SELECT roll_no, name, branch, marks, attendance FROM students {where};", params)
+        results.extend(cur.fetchall())
         conn.close()
 
-def delete_student(roll_no, branch):
-    """Delete a student from correct node."""
-    conn = get_connection(branch)
-    try:
-        cursor = conn.cursor()
-        query = "DELETE FROM students WHERE roll_no=%s"
-        cursor.execute(query, (roll_no,))
-        conn.commit()
-        return cursor.rowcount > 0
-    except Error as e:
-        print("❌ Error deleting student:", e)
-        return False
-    finally:
-        conn.close()
+    if branch:
+        conn = get_connection(branch)
+        run_query(conn)
+    else:
+        for _, conn in get_all_connections():
+            t = threading.Thread(target=run_query, args=(conn,))
+            t.start()
+            threads.append(t)
+        for t in threads:
+            t.join()
+
+    return results
