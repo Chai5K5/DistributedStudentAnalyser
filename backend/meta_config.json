@@ -1,34 +1,9 @@
 {
-  "CSE": {
-    "host": "localhost",
-    "user": "root",
-    "password": "@Admin123",
-    "database": "db_cse",
-    "fragments": ["students"],
-    "replicas": ["courses", "departments"]
+  "nodes": {
+    "CSE": { "host": "localhost", "user": "root", "password": "@Admin123", "database": "db_cse" },
+    "AIML": { "host": "localhost", "user": "root", "password": "@Admin123", "database": "db_aiml" },
+    "DS":   { "host": "localhost", "user": "root", "password": "@Admin123", "database": "db_ds" },
+    "CC":   { "host": "localhost", "user": "root", "password": "@Admin123", "database": "db_cc" }
   },
-  "AIML": {
-    "host": "localhost",
-    "user": "root",
-    "password": "@Admin123",
-    "database": "db_aiml",
-    "fragments": ["students"],
-    "replicas": ["courses", "departments"]
-  },
-  "DS": {
-    "host": "localhost",
-    "user": "root",
-    "password": "@Admin123",
-    "database": "db_ds",
-    "fragments": ["students"],
-    "replicas": ["courses", "departments"]
-  },
-  "CC": {
-    "host": "localhost",
-    "user": "root",
-    "password": "@Admin123",
-    "database": "db_cc",
-    "fragments": ["students"],
-    "replicas": ["courses", "departments"]
-  }
+  "replication_enabled": false
 }
