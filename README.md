@@ -47,9 +47,6 @@ attendance data—automatically highlighting students with attendance below 75%.
 3. Install libraries
    
        pip install customtkinter matplotlib numpy pandas
-4. Run the following command
-   
-       python ui/dashboard.py
 
 ## ⚙️ Database Setup (MySQL Distributed Backend)
 
