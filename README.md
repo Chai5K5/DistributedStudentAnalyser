@@ -50,3 +50,30 @@ attendance data—automatically highlighting students with attendance below 75%.
 4. Run the following command
    
        python ui/dashboard.py
+
+## ⚙️ Database Setup (MySQL Distributed Backend)
+
+This project uses **MySQL stored procedures** to manage distributed student records across multiple databases (horizontal fragmentation).
+
+### 🧩 Step 1: Create Databases
+Run the SQL script `database/initial_setup.sql` in MySQL Workbench to create the distributed databases:
+- `db_cse`
+- `db_aiml`
+- `db_ds`
+- `db_cc`
+
+### 🧱 Step 2: Create Stored Procedures
+Execute `database/distributed_backend.sql` in MySQL Workbench.
+It defines the following backend procedures:
+- `add_student`
+- `update_student`
+- `delete_student`
+- `fetch_all_students`
+- `filter_students`
+
+### ⚡ Step 3: Run the Application
+Activate your Python environment and run:
+
+```bash
+python ui/dashboard.py
+
